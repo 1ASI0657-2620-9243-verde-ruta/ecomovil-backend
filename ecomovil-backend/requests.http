@@ -1,0 +1,18 @@
+### Obtener vehículos
+GET http://localhost:8080/api/vehicles
+
+### Crear vehículo
+POST http://localhost:8080/api/vehicles
+Content-Type: application/json
+
+{
+  "type": "BICICLETA",
+  "brand": "Trek",
+  "model": "Marlin 5",
+  "status": "AVAILABLE",
+  "latitude": -12.0464,
+  "longitude": -77.0428
+}
+
+### Obtener vehículo
+GET http://localhost:8080/api/vehicles/1

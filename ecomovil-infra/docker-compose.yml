@@ -1,0 +1,26 @@
+services:
+
+  postgres:
+    image: postgis/postgis:16-3.4
+    container_name: ecomovil-postgres
+    environment:
+      POSTGRES_DB: ecomovil
+      POSTGRES_USER: ecomovil
+      POSTGRES_PASSWORD: ecomovil123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: ecomovil-mosquitto
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+
+volumes:
+  postgres_data:
