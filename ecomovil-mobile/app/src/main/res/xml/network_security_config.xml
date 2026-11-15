@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- El backend local corre por HTTP (sin TLS): se permite tráfico en claro para
+     10.0.2.2 (la PC vista desde el emulador) y para IPs de la red local. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>
