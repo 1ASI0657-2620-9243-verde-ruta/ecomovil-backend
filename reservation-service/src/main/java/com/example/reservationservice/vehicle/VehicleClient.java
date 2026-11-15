@@ -1,6 +1,7 @@
 package com.example.reservationservice.vehicle;
 
 import com.example.reservationservice.vehicle.dto.VehicleResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
@@ -9,18 +10,22 @@ public class VehicleClient {
 
     private final RestClient restClient;
 
-    private static final String VEHICLE_SERVICE_URL =
-            "http://localhost:8081";
+    private final String vehicleServiceUrl;
 
-    public VehicleClient(RestClient restClient) {
+    public VehicleClient(
+            RestClient restClient,
+            @Value("${vehicle-service.url:http://localhost:8081}")
+            String vehicleServiceUrl
+    ) {
         this.restClient = restClient;
+        this.vehicleServiceUrl = vehicleServiceUrl;
     }
 
     public VehicleResponse getVehicle(Long vehicleId) {
 
         return restClient.get()
                 .uri(
-                        VEHICLE_SERVICE_URL
+                        vehicleServiceUrl
                                 + "/api/vehicles/{id}",
                         vehicleId
                 )
@@ -35,7 +40,7 @@ public class VehicleClient {
 
         return restClient.put()
                 .uri(
-                        VEHICLE_SERVICE_URL
+                        vehicleServiceUrl
                                 + "/api/vehicles/{id}",
                         vehicleId
                 )
