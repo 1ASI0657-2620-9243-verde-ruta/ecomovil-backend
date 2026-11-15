@@ -1,0 +1,16 @@
+#cloud-config
+# Pegar este archivo en "Custom data" (Azure), "User data" (AWS) o como
+# script de inicio (Google Cloud) al crear una VM Ubuntu 22.04/24.04.
+# Instala Docker, clona el repositorio y levanta EcoMovil completo.
+package_update: true
+packages:
+  - git
+  - ca-certificates
+  - curl
+
+runcmd:
+  - fallocate -l 2G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile
+  - echo '/swapfile none swap sw 0 0' >> /etc/fstab
+  - curl -fsSL https://get.docker.com | sh
+  - git clone https://github.com/1ASI0657-2620-9243-verde-ruta/ecomovil-backend.git /opt/ecomovil
+  - cd /opt/ecomovil/ecomovil-infra && docker compose -f docker-compose.prod.yml up -d --build
