@@ -25,3 +25,10 @@ Thumbs.db
 
 # VS Code
 .vscode/
+
+# Persistencia local del cliente MQTT (Paho) al ejecutar los servicios
+**/ecomovil-*-service/
+
+# Datos y logs locales de Mosquitto
+ecomovil-infra/mosquitto/data/
+ecomovil-infra/mosquitto/log/

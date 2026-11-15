@@ -198,6 +198,27 @@ public class MqttTelemetryListener implements MqttCallback {
                     (Boolean) data.get("locked")
             );
 
+            // Campos opcionales: batería, distancia, reserva y usuario
+            telemetry.setBattery(
+                    data.get("battery") instanceof Number n
+                            ? n.intValue() : null
+            );
+
+            telemetry.setDistanceKm(
+                    data.get("distanceKm") instanceof Number n
+                            ? n.doubleValue() : null
+            );
+
+            telemetry.setReservationId(
+                    data.get("reservationId") instanceof Number n
+                            ? n.longValue() : null
+            );
+
+            telemetry.setUserId(
+                    data.get("userId") instanceof Number n
+                            ? n.longValue() : null
+            );
+
             // Guardar en PostgreSQL
             telemetryRepository.save(telemetry);
 
