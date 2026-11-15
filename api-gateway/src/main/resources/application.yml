@@ -20,37 +20,37 @@ spring:
           routes:
 
             - id: vehicle-service
-              uri: http://localhost:8081
+              uri: ${VEHICLE_SERVICE_URL:http://localhost:8081}
               predicates:
                 - Path=/api/vehicles/**
 
             - id: telemetry-service
-              uri: http://localhost:8082
+              uri: ${TELEMETRY_SERVICE_URL:http://localhost:8082}
               predicates:
                 - Path=/api/telemetry/**
 
             - id: safety-service
-              uri: http://localhost:8083
+              uri: ${SAFETY_SERVICE_URL:http://localhost:8083}
               predicates:
                 - Path=/api/safety/**
 
             - id: access-service
-              uri: http://localhost:8084
+              uri: ${ACCESS_SERVICE_URL:http://localhost:8084}
               predicates:
                 - Path=/api/access/**
 
             - id: reservation-service
-              uri: http://localhost:8085
+              uri: ${RESERVATION_SERVICE_URL:http://localhost:8085}
               predicates:
                 - Path=/api/reservations/**
 
             - id: iam-auth-service
-              uri: http://localhost:8086
+              uri: ${IAM_SERVICE_URL:http://localhost:8086}
               predicates:
                 - Path=/api/auth/**
 
             - id: iam-user-service
-              uri: http://localhost:8086
+              uri: ${IAM_SERVICE_URL:http://localhost:8086}
               predicates:
                 - Path=/api/users/**
 

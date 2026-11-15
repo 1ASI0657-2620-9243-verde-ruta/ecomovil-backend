@@ -1,0 +1,159 @@
+# EcoMovil - despliegue completo en un servidor con Docker.
+# Uso:  docker compose -f docker-compose.prod.yml up -d --build
+# Puertos públicos: 80 (web y /api) y 8080 (API Gateway, para la app Android).
+
+name: ecomovil
+
+services:
+
+  postgres:
+    image: postgis/postgis:16-3.4
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ecomovil
+      POSTGRES_USER: ${DB_USER:-ecomovil}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-ecomovil123}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d ecomovil"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    restart: unless-stopped
+    volumes:
+      - ./mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mosquitto_sub -t '$$SYS/broker/version' -C 1 -W 3 -i healthcheck"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    # Para conectar un ESP32 o un simulador externo, publicar el puerto:
+    # ports:
+    #   - "1883:1883"
+
+  iam-service:
+    build: ../iam-service
+    restart: unless-stopped
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/ecomovil
+      DB_USER: ${DB_USER:-ecomovil}
+      DB_PASSWORD: ${DB_PASSWORD:-ecomovil123}
+      SHOW_SQL: "false"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  vehicle-service:
+    build: ../vehicle-service
+    restart: unless-stopped
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/ecomovil
+      DB_USER: ${DB_USER:-ecomovil}
+      DB_PASSWORD: ${DB_PASSWORD:-ecomovil123}
+      SHOW_SQL: "false"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  reservation-service:
+    build: ../reservation-service
+    restart: unless-stopped
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/ecomovil
+      DB_USER: ${DB_USER:-ecomovil}
+      DB_PASSWORD: ${DB_PASSWORD:-ecomovil123}
+      SHOW_SQL: "false"
+      VEHICLE_SERVICE_URL: http://vehicle-service:8081
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  telemetry-service:
+    build: ../telemetry-service
+    restart: unless-stopped
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/ecomovil
+      DB_USER: ${DB_USER:-ecomovil}
+      DB_PASSWORD: ${DB_PASSWORD:-ecomovil123}
+      SHOW_SQL: "false"
+      MQTT_BROKER_URL: tcp://mosquitto:1883
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mosquitto:
+        condition: service_healthy
+
+  safety-service:
+    build: ../safety-service
+    restart: unless-stopped
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/ecomovil
+      DB_USER: ${DB_USER:-ecomovil}
+      DB_PASSWORD: ${DB_PASSWORD:-ecomovil123}
+      SHOW_SQL: "false"
+      MQTT_BROKER_URL: tcp://mosquitto:1883
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mosquitto:
+        condition: service_healthy
+
+  access-service:
+    build: ../access-service
+    restart: unless-stopped
+    environment:
+      MQTT_BROKER_URL: tcp://mosquitto:1883
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+
+  api-gateway:
+    build: ../api-gateway
+    restart: unless-stopped
+    environment:
+      IAM_SERVICE_URL: http://iam-service:8086
+      VEHICLE_SERVICE_URL: http://vehicle-service:8081
+      TELEMETRY_SERVICE_URL: http://telemetry-service:8082
+      SAFETY_SERVICE_URL: http://safety-service:8083
+      ACCESS_SERVICE_URL: http://access-service:8084
+      RESERVATION_SERVICE_URL: http://reservation-service:8085
+    ports:
+      - "8080:8080"
+    depends_on:
+      - iam-service
+      - vehicle-service
+      - reservation-service
+      - telemetry-service
+      - safety-service
+      - access-service
+
+  web:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    volumes:
+      - ../ecomovil-web:/usr/share/nginx/html:ro
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "80:80"
+    depends_on:
+      - api-gateway
+
+  iot-simulator:
+    build: ../ecomovil-iot-simulator
+    restart: unless-stopped
+    environment:
+      ECOMOVIL_API_URL: http://api-gateway:8080
+      MQTT_BROKER: mosquitto
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+      api-gateway:
+        condition: service_started
+
+volumes:
+  postgres_data:

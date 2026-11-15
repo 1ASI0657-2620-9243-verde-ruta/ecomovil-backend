@@ -80,6 +80,10 @@ python simulator.py --intervalo 2     # telemetría cada 2 segundos
 - El APK de depuración se compila en GitHub Actions en cada cambio
   (pestaña Actions, artefacto `ecomovil-debug-apk`).
 
+## Despliegue en la nube
+
+Todo el sistema se levanta con `ecomovil-infra/docker-compose.prod.yml` en una VM con Docker. La guía paso a paso para Azure, AWS o Google Cloud está en [DEPLOY.md](DEPLOY.md).
+
 ## Notas
 
 - El repositorio excluye `target/`, `.idea/` y entornos virtuales.
