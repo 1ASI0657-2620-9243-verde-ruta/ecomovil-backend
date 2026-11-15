@@ -36,6 +36,15 @@ public class Telemetry {
     @Column(nullable = false)
     private Boolean locked;
 
+    // Datos opcionales que envía el simulador IoT / ESP32
+    private Integer battery;
+
+    private Double distanceKm;
+
+    private Long reservationId;
+
+    private Long userId;
+
     public Telemetry() {
     }
 
@@ -113,5 +122,37 @@ public class Telemetry {
 
     public void setLocked(Boolean locked) {
         this.locked = locked;
+    }
+
+    public Integer getBattery() {
+        return battery;
+    }
+
+    public void setBattery(Integer battery) {
+        this.battery = battery;
+    }
+
+    public Double getDistanceKm() {
+        return distanceKm;
+    }
+
+    public void setDistanceKm(Double distanceKm) {
+        this.distanceKm = distanceKm;
+    }
+
+    public Long getReservationId() {
+        return reservationId;
+    }
+
+    public void setReservationId(Long reservationId) {
+        this.reservationId = reservationId;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 }
